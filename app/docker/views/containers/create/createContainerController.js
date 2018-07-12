@@ -1,6 +1,6 @@
 angular.module('portainer.docker')
-.controller('CreateContainerController', ['$q', '$scope', '$state', '$timeout', '$transition$', '$filter', 'Container', 'ContainerHelper', 'Image', 'ImageHelper', 'Volume', 'NetworkService', 'ResourceControlService', 'Authentication', 'Notifications', 'ContainerService', 'ImageService', 'FormValidator', 'ModalService', 'RegistryService', 'SystemService', 'SettingsService',
-function ($q, $scope, $state, $timeout, $transition$, $filter, Container, ContainerHelper, Image, ImageHelper, Volume, NetworkService, ResourceControlService, Authentication, Notifications, ContainerService, ImageService, FormValidator, ModalService, RegistryService, SystemService, SettingsService) {
+.controller('CreateContainerController', ['$q', '$scope', '$state', '$timeout', '$transition$', '$filter', 'Container', 'ContainerHelper', 'Image', 'ImageHelper', 'Volume', 'NetworkService', 'ResourceControlService', 'Authentication', 'Notifications', 'ContainerService', 'ImageService', 'FormValidator', 'ModalService', 'RegistryService', 'SystemService', 'SettingsService', 'HttpRequestHelper',
+function ($q, $scope, $state, $timeout, $transition$, $filter, Container, ContainerHelper, Image, ImageHelper, Volume, NetworkService, ResourceControlService, Authentication, Notifications, ContainerService, ImageService, FormValidator, ModalService, RegistryService, SystemService, SettingsService, HttpRequestHelper) {
 
   $scope.formValues = {
     alwaysPull: true,
@@ -15,8 +15,11 @@ function ($q, $scope, $state, $timeout, $transition$, $filter, Container, Contai
     AccessControlData: new AccessControlFormData(),
     CpuLimit: 0,
     MemoryLimit: 0,
-    MemoryReservation: 0
+    MemoryReservation: 0,
+    NodeName: null
   };
+
+  $scope.extraNetworks = {};
 
   $scope.state = {
     formValidationError: '',
@@ -183,9 +186,6 @@ function ($q, $scope, $state, $timeout, $transition$, $filter, Container, Contai
     var containerName = container;
     if (container && typeof container === 'object') {
       containerName = $filter('trimcontainername')(container.Names[0]);
-      if ($scope.applicationState.endpoint.mode.provider === 'DOCKER_SWARM') {
-        containerName = $filter('swarmcontainername')(container);
-      }
     }
     var networkMode = mode;
     if (containerName) {
@@ -319,7 +319,7 @@ function ($q, $scope, $state, $timeout, $transition$, $filter, Container, Contai
     var bindings = [];
     for (var p in $scope.config.HostConfig.PortBindings) {
       if ({}.hasOwnProperty.call($scope.config.HostConfig.PortBindings, p)) {
-	var hostPort = '';
+        var hostPort = '';
         if ($scope.config.HostConfig.PortBindings[p][0].HostIp) {
           hostPort = $scope.config.HostConfig.PortBindings[p][0].HostIp + ':';
         }
@@ -389,13 +389,24 @@ function ($q, $scope, $state, $timeout, $transition$, $filter, Container, Contai
     }
     $scope.config.NetworkingConfig.EndpointsConfig[$scope.config.HostConfig.NetworkMode] = d.NetworkSettings.Networks[$scope.config.HostConfig.NetworkMode];
     // Mac Address
-    $scope.formValues.MacAddress = d.NetworkSettings.Networks[$scope.config.HostConfig.NetworkMode].MacAddress;
+    if(Object.keys(d.NetworkSettings.Networks).length) {
+      var firstNetwork = d.NetworkSettings.Networks[Object.keys(d.NetworkSettings.Networks)[0]];
+      $scope.formValues.MacAddress = firstNetwork.MacAddress;
+      $scope.config.NetworkingConfig.EndpointsConfig[$scope.config.HostConfig.NetworkMode] = firstNetwork;
+      $scope.extraNetworks = angular.copy(d.NetworkSettings.Networks);
+      delete $scope.extraNetworks[Object.keys(d.NetworkSettings.Networks)[0]];
+    } else {
+      $scope.formValues.MacAddress = '';
+    }
+    
     // ExtraHosts
-    for (var h in $scope.config.HostConfig.ExtraHosts) {
-      if ({}.hasOwnProperty.call($scope.config.HostConfig.ExtraHosts, h)) {
-        $scope.formValues.ExtraHosts.push({'value': $scope.config.HostConfig.ExtraHosts[h]});
-        $scope.config.HostConfig.ExtraHosts = [];
+    if ($scope.config.HostConfig.ExtraHosts) {
+      var extraHosts = $scope.config.HostConfig.ExtraHosts;
+      for (var i = 0; i < extraHosts.length; i++) {
+        var host = extraHosts[i];
+        $scope.formValues.ExtraHosts.push({ 'value': host });
       }
+      $scope.config.HostConfig.ExtraHosts = [];
     }
   }
 
@@ -494,6 +505,10 @@ function ($q, $scope, $state, $timeout, $transition$, $filter, Container, Contai
   }
 
   function initView() {
+    var nodeName = $transition$.params().nodeName;
+    $scope.formValues.NodeName = nodeName;
+    HttpRequestHelper.setPortainerAgentTargetHeader(nodeName);
+
     Volume.query({}, function (d) {
       $scope.availableVolumes = d.Volumes;
     }, function (e) {
@@ -505,8 +520,7 @@ function ($q, $scope, $state, $timeout, $transition$, $filter, Container, Contai
     NetworkService.networks(
       provider === 'DOCKER_STANDALONE' || provider === 'DOCKER_SWARM_MODE',
       false,
-      provider === 'DOCKER_SWARM_MODE' && apiVersion >= 1.25,
-      provider === 'DOCKER_SWARM'
+      provider === 'DOCKER_SWARM_MODE' && apiVersion >= 1.25
     )
     .then(function success(data) {
       var networks = data;
@@ -524,7 +538,7 @@ function ($q, $scope, $state, $timeout, $transition$, $filter, Container, Contai
     Container.query({}, function (d) {
       var containers = d;
       $scope.runningContainers = containers;
-      if ($transition$.params().from !== '') {
+      if ($transition$.params().from) {
         loadFromContainerSpec();
       } else {
         $scope.fromContainer = {};
@@ -591,6 +605,8 @@ function ($q, $scope, $state, $timeout, $transition$, $filter, Container, Contai
 
       $scope.state.actionInProgress = true;
       var config = prepareConfiguration();
+      var nodeName = $scope.formValues.NodeName;
+      HttpRequestHelper.setPortainerAgentTargetHeader(nodeName);
       createContainer(config, accessControlData);
     })
     .catch(function error(err) {
@@ -599,13 +615,23 @@ function ($q, $scope, $state, $timeout, $transition$, $filter, Container, Contai
   };
 
   function createContainer(config, accessControlData) {
+    var containerIdentifier;
     $q.when(!$scope.formValues.alwaysPull || ImageService.pullImage($scope.config.Image, $scope.formValues.Registry, true))
     .finally(function final() {
       ContainerService.createAndStartContainer(config)
       .then(function success(data) {
-        var containerIdentifier = data.Id;
+        containerIdentifier = data.Id;
         var userId = Authentication.getUserDetails().ID;
         return ResourceControlService.applyResourceControl('container', containerIdentifier, userId, accessControlData, []);
+      })
+      .then(function success() {
+        if($scope.extraNetworks) {
+          return $q.all(
+            Object.keys($scope.extraNetworks).map(function(networkName) {
+              return NetworkService.connectContainer(networkName, containerIdentifier);
+            })
+          );
+        }
       })
       .then(function success() {
         Notifications.success('Container successfully created');

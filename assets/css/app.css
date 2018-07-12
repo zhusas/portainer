@@ -119,6 +119,10 @@ a[ng-click]{
   color: white;
 }
 
+.fa.blue-icon {
+  color: #337ab7;
+}
+
 .widget .widget-body table tbody .image-tag {
   font-size: 90% !important;
   margin-right: 5px;
@@ -133,7 +137,7 @@ a[ng-click]{
 }
 
 .widget .widget-body table tbody td {
-  white-space: nowrap; 
+  white-space: nowrap;
 }
 
 .template-widget {
@@ -298,6 +302,10 @@ ul.sidebar {
 
 ul.sidebar .sidebar-title {
   height: auto;
+}
+
+ul.sidebar .sidebar-title .endpoint-name {
+  color: #fff;
 }
 
 ul.sidebar .sidebar-list a {
@@ -560,6 +568,10 @@ ul.sidebar .sidebar-list .sidebar-sublist a.active {
   font-weight: bold;
 }
 
+.boxselector_header .fa,.fab {
+  font-weight: normal;
+}
+
 .boxselector_wrapper input[type="radio"] {
   display: none;
 }
@@ -717,6 +729,18 @@ ul.sidebar .sidebar-list .sidebar-sublist a.active {
   background-color: #C5CAE9;
 }
 
+.row.header .meta .page {
+  padding-top: 7px;
+}
+
+.tag {
+  padding: 2px 6px;
+  color: white;
+  background-color: #337ab7;
+  border: 1px solid #2e6da4;
+  border-radius: 4px;
+}
+
 /*bootbox override*/
 .modal-open {
   padding-right: 0 !important;
@@ -775,12 +799,12 @@ ul.sidebar .sidebar-list .sidebar-sublist a.active {
   font-weight: 600;
 }
 
-/* json-tree */
-
+/* json-tree override */
 json-tree {
   font-size: 13px;
   color: #30426a;
 }
+
 json-tree .key {
   color: #738bc0;
   padding-right: 5px;
@@ -791,7 +815,4 @@ json-tree .branch-preview {
   font-size: 11px;
   opacity: .5;
 }
-
-.row.header .meta .page {
-  padding-top: 7px;
-}
+/* !json-tree override */

@@ -49,15 +49,12 @@ angular.module('portainer.docker', ['portainer.app'])
         templateUrl: 'app/docker/views/containers/containers.html',
         controller: 'ContainersController'
       }
-    },
-    params: {
-      selectedContainers: []
     }
   };
 
   var container = {
     name: 'docker.containers.container',
-    url: '/:id',
+    url: '/:id?nodeName',
     views: {
       'content@': {
         templateUrl: 'app/docker/views/containers/edit/container.html',
@@ -79,15 +76,12 @@ angular.module('portainer.docker', ['portainer.app'])
 
   var containerCreation = {
     name: 'docker.containers.new',
-    url: '/new',
+    url: '/new?nodeName&from',
     views: {
       'content@': {
         templateUrl: 'app/docker/views/containers/create/createcontainer.html',
         controller: 'CreateContainerController'
       }
-    },
-    params: {
-      from: ''
     }
   };
 
@@ -170,7 +164,7 @@ angular.module('portainer.docker', ['portainer.app'])
 
   var image = {
     name: 'docker.images.image',
-    url: '/:id',
+    url: '/:id?nodeName',
     views: {
       'content@': {
         templateUrl: 'app/docker/views/images/edit/image.html',
@@ -203,7 +197,7 @@ angular.module('portainer.docker', ['portainer.app'])
 
   var network = {
     name: 'docker.networks.network',
-    url: '/:id',
+    url: '/:id?nodeName',
     views: {
       'content@': {
         templateUrl: 'app/docker/views/networks/edit/network.html',
@@ -317,39 +311,6 @@ angular.module('portainer.docker', ['portainer.app'])
     }
   };
 
-  var stacks = {
-    name: 'docker.stacks',
-    url: '/stacks',
-    views: {
-      'content@': {
-        templateUrl: 'app/docker/views/stacks/stacks.html',
-        controller: 'StacksController'
-      }
-    }
-  };
-
-  var stack = {
-    name: 'docker.stacks.stack',
-    url: '/:id',
-    views: {
-      'content@': {
-        templateUrl: 'app/docker/views/stacks/edit/stack.html',
-        controller: 'StackController'
-      }
-    }
-  };
-
-  var stackCreation = {
-    name: 'docker.stacks.new',
-    url: '/new',
-    views: {
-      'content@': {
-        templateUrl: 'app/docker/views/stacks/create/createstack.html',
-        controller: 'CreateStackController'
-      }
-    }
-  };
-
   var swarm = {
     name: 'docker.swarm',
     url: '/swarm',
@@ -443,7 +404,7 @@ angular.module('portainer.docker', ['portainer.app'])
 
   var volume = {
     name: 'docker.volumes.volume',
-    url: '/:id',
+    url: '/:id?nodeName',
     views: {
       'content@': {
         templateUrl: 'app/docker/views/volumes/edit/volume.html',
@@ -492,9 +453,6 @@ angular.module('portainer.docker', ['portainer.app'])
   $stateRegistryProvider.register(service);
   $stateRegistryProvider.register(serviceCreation);
   $stateRegistryProvider.register(serviceLogs);
-  $stateRegistryProvider.register(stacks);
-  $stateRegistryProvider.register(stack);
-  $stateRegistryProvider.register(stackCreation);
   $stateRegistryProvider.register(swarm);
   $stateRegistryProvider.register(swarmVisualizer);
   $stateRegistryProvider.register(tasks);

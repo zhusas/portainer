@@ -2,7 +2,7 @@ angular.module('portainer.docker').component('containersDatatable', {
   templateUrl: 'app/docker/components/datatables/containers-datatable/containersDatatable.html',
   controller: 'ContainersDatatableController',
   bindings: {
-    title: '@',
+    titleText: '@',
     titleIcon: '@',
     dataset: '<',
     tableKey: '@',
@@ -10,15 +10,7 @@ angular.module('portainer.docker').component('containersDatatable', {
     reverseOrder: '<',
     showTextFilter: '<',
     showOwnershipColumn: '<',
-    swarmContainers: '<',
-    publicUrl: '<',
-    containerNameTruncateSize: '<',
-    startAction: '<',
-    stopAction: '<',
-    killAction: '<',
-    restartAction: '<',
-    pauseAction: '<',
-    resumeAction: '<',
-    removeAction: '<'
+    showHostColumn: '<',
+    showAddAction: '<'
   }
 });

@@ -1,6 +1,6 @@
 angular.module('portainer.docker')
-.controller('TemplatesController', ['$scope', '$q', '$state', '$transition$', '$anchorScroll', '$filter', 'ContainerService', 'ContainerHelper', 'ImageService', 'NetworkService', 'TemplateService', 'TemplateHelper', 'VolumeService', 'Notifications', 'PaginationService', 'ResourceControlService', 'Authentication', 'FormValidator', 'SettingsService', 'StackService',
-function ($scope, $q, $state, $transition$, $anchorScroll, $filter, ContainerService, ContainerHelper, ImageService, NetworkService, TemplateService, TemplateHelper, VolumeService, Notifications, PaginationService, ResourceControlService, Authentication, FormValidator, SettingsService, StackService) {
+.controller('TemplatesController', ['$scope', '$q', '$state', '$transition$', '$anchorScroll', '$filter', 'ContainerService', 'ContainerHelper', 'ImageService', 'NetworkService', 'TemplateService', 'TemplateHelper', 'VolumeService', 'Notifications', 'PaginationService', 'ResourceControlService', 'Authentication', 'FormValidator', 'SettingsService', 'StackService', 'EndpointProvider',
+function ($scope, $q, $state, $transition$, $anchorScroll, $filter, ContainerService, ContainerHelper, ImageService, NetworkService, TemplateService, TemplateHelper, VolumeService, Notifications, PaginationService, ResourceControlService, Authentication, FormValidator, SettingsService, StackService, EndpointProvider) {
   $scope.state = {
     selectedTemplate: null,
     showAdvancedOptions: false,
@@ -113,13 +113,14 @@ function ($scope, $q, $state, $transition$, $anchorScroll, $filter, ContainerSer
       ComposeFilePathInRepository: template.Repository.stackfile
     };
 
-    StackService.createStackFromGitRepository(stackName, repositoryOptions, template.Env)
+    var endpointId = EndpointProvider.endpointID();
+    StackService.createSwarmStackFromGitRepository(stackName, repositoryOptions, template.Env, endpointId)
     .then(function success(data) {
       return ResourceControlService.applyResourceControl('stack', stackName, userId, accessControlData, []);
     })
     .then(function success() {
       Notifications.success('Stack successfully deployed');
-      $state.go('docker.stacks');
+      $state.go('portainer.stacks');
     })
     .catch(function error(err) {
       Notifications.warning('Deployment error', err.err.data.err);
@@ -198,11 +199,8 @@ function ($scope, $q, $state, $transition$, $anchorScroll, $filter, ContainerSer
   }
 
   function determineContainerMapping(network) {
-    var endpointProvider = $scope.applicationState.endpoint.mode.provider;
     var containerMapping = 'BY_CONTAINER_IP';
-    if (endpointProvider === 'DOCKER_SWARM' && network.Scope === 'global') {
-      containerMapping = 'BY_SWARM_CONTAINER_NAME';
-    } else if (network.Name !== 'bridge') {
+    if (network.Name !== 'bridge') {
       containerMapping = 'BY_CONTAINER_NAME';
     }
     return containerMapping;
@@ -231,8 +229,8 @@ function ($scope, $q, $state, $transition$, $anchorScroll, $filter, ContainerSer
       networks: NetworkService.networks(
         provider === 'DOCKER_STANDALONE' || provider === 'DOCKER_SWARM_MODE',
         false,
-        provider === 'DOCKER_SWARM_MODE' && apiVersion >= 1.25,
-        provider === 'DOCKER_SWARM'),
+        provider === 'DOCKER_SWARM_MODE' && apiVersion >= 1.25
+      ),
       settings: SettingsService.publicSettings()
     })
     .then(function success(data) {

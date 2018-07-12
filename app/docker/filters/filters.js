@@ -62,6 +62,16 @@ angular.module('portainer.docker')
     return labelStyle;
   };
 })
+.filter('taskhaslogs', function () {
+  'use strict';
+  return function (state) {
+    var validState = ['running', 'complete', 'failed', 'shutdown'];
+    if (validState.indexOf(state) > -1) {
+      return true;
+    }
+    return false;
+  };
+})
 .filter('containerstatusbadge', function () {
   'use strict';
   return function (text) {
@@ -74,28 +84,6 @@ angular.module('portainer.docker')
       return 'danger';
     }
     return 'success';
-  };
-})
-.filter('containerstatus', function () {
-  'use strict';
-  return function (text) {
-    var status = _.toLower(text);
-    if (includeString(status, ['paused'])) {
-      return 'paused';
-    } else if (includeString(status, ['dead'])) {
-      return 'dead';
-    } else if (includeString(status, ['created'])) {
-      return 'created';
-    } else if (includeString(status, ['exited'])) {
-      return 'stopped';
-    } else if (includeString(status, ['(healthy)'])) {
-      return 'healthy';
-    } else if (includeString(status, ['(unhealthy)'])) {
-      return 'unhealthy';
-    } else if (includeString(status, ['(health: starting)'])) {
-      return 'starting';
-    }
-    return 'running';
   };
 })
 .filter('nodestatusbadge', function () {
@@ -160,12 +148,6 @@ angular.module('portainer.docker')
   return function (container) {
     var name = container.Names[0];
     return name.substring(1, name.length);
-  };
-})
-.filter('swarmcontainername', function () {
-  'use strict';
-  return function (container) {
-    return _.split(container.Names[0], '/')[2];
   };
 })
 .filter('swarmversion', function () {

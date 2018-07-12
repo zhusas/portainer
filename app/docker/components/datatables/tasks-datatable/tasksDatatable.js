@@ -2,7 +2,7 @@ angular.module('portainer.docker').component('tasksDatatable', {
   templateUrl: 'app/docker/components/datatables/tasks-datatable/tasksDatatable.html',
   controller: 'GenericDatatableController',
   bindings: {
-    title: '@',
+    titleText: '@',
     titleIcon: '@',
     dataset: '<',
     tableKey: '@',
@@ -11,6 +11,7 @@ angular.module('portainer.docker').component('tasksDatatable', {
     nodes: '<',
     showTextFilter: '<',
     showSlotColumn: '<',
-    showLogsButton: '<'
+    showLogsButton: '<',
+    agentProxy: '<'
   }
 });

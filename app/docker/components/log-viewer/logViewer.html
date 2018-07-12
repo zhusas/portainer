@@ -1,7 +1,7 @@
 <div class="row">
   <div class="col-sm-12">
     <rd-widget>
-      <rd-widget-header icon="fa-file-alt" title="Log viewer settings"></rd-widget-header>
+      <rd-widget-header icon="fa-file-alt" title-text="Log viewer settings"></rd-widget-header>
       <rd-widget-body>
         <form class="form-horizontal">
           <div class="form-group">
@@ -31,6 +31,14 @@
             </label>
             <div class="col-sm-11">
               <input class="form-control" type="text" name="logs_search" ng-model="$ctrl.state.search" ng-change="$ctrl.state.selectedLines.length = 0;" placeholder="Filter...">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="lines_count" class="col-sm-1 control-label text-left">
+              Lines
+            </label>
+            <div class="col-sm-11">
+              <input class="form-control" type="number" name="lines_count" ng-model="$ctrl.lineCount" placeholder="Enter no of lines...">
             </div>
           </div>
           <div class="form-group" ng-if="$ctrl.state.copySupported">

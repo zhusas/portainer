@@ -4,9 +4,23 @@ function ImageViewModel(data) {
   this.Repository = data.Repository;
   this.Created = data.Created;
   this.Checked = false;
+
   this.RepoTags = data.RepoTags;
+  if (!this.RepoTags && data.RepoDigests) {
+    this.RepoTags = [];
+    for (var i = 0; i < data.RepoDigests.length; i++) {
+      var digest = data.RepoDigests[i];
+      var repository = digest.substring(0, digest.indexOf('@'));
+      this.RepoTags.push(repository + ':<none>');
+    }
+  }
+
   this.VirtualSize = data.VirtualSize;
   this.ContainerCount = data.ContainerCount;
+
+  if (data.Portainer && data.Portainer.Agent && data.Portainer.Agent.NodeName) {
+    this.NodeName = data.Portainer.Agent.NodeName;
+  }
 }
 
 function ImageBuildModel(data) {

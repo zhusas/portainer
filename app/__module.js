@@ -1,6 +1,7 @@
 angular.module('portainer', [
   'ui.bootstrap',
   'ui.router',
+  'ui.select',
   'isteven-multi-select',
   'ngCookies',
   'ngSanitize',
@@ -17,6 +18,8 @@ angular.module('portainer', [
   'luegg.directives',
   'portainer.templates',
   'portainer.app',
+  'portainer.agent',
+  'portainer.azure',
   'portainer.docker',
   'extension.storidge',
   'rzModule']);

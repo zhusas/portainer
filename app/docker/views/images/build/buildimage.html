@@ -1,5 +1,5 @@
 <rd-header>
-  <rd-header-title title="Build image"></rd-header-title>
+  <rd-header-title title-text="Build image"></rd-header-title>
   <rd-header-content>
     <a ui-sref="docker.images">Images</a> &gt; Build image
   </rd-header-content>
@@ -194,6 +194,16 @@
                 </div>
               </div>
               <!-- !url -->
+              <div ng-if="applicationState.endpoint.mode.agentProxy">
+                <div class="col-sm-12 form-section-title">
+                  Deployment
+                </div>
+                <!-- node-selection -->
+                <node-selector
+                  model="formValues.NodeName">
+                </node-selector>
+                <!-- !node-selection -->
+              </div>
               <!-- actions -->
               <div class="col-sm-12 form-section-title">
                 Actions

@@ -121,6 +121,17 @@ angular.module('portainer.app', [])
     }
   };
 
+  var endpointCreation  = {
+    name: 'portainer.endpoints.new',
+    url: '/new',
+    views: {
+      'content@': {
+        templateUrl: 'app/portainer/views/endpoints/create/createendpoint.html',
+        controller: 'CreateEndpointController'
+      }
+    }
+  };
+
   var endpointAccess = {
     name: 'portainer.endpoints.endpoint.access',
     url: '/access',
@@ -128,6 +139,50 @@ angular.module('portainer.app', [])
       'content@': {
         templateUrl: 'app/portainer/views/endpoints/access/endpointAccess.html',
         controller: 'EndpointAccessController'
+      }
+    }
+  };
+
+  var groups = {
+    name: 'portainer.groups',
+    url: '/groups',
+    views: {
+      'content@': {
+        templateUrl: 'app/portainer/views/groups/groups.html',
+        controller: 'GroupsController'
+      }
+    }
+  };
+
+  var group = {
+    name: 'portainer.groups.group',
+    url: '/:id',
+    views: {
+      'content@': {
+        templateUrl: 'app/portainer/views/groups/edit/group.html',
+        controller: 'GroupController'
+      }
+    }
+  };
+
+  var groupCreation = {
+    name: 'portainer.groups.new',
+    url: '/new',
+    views: {
+      'content@': {
+        templateUrl: 'app/portainer/views/groups/create/creategroup.html',
+        controller: 'CreateGroupController'
+      }
+    }
+  };
+
+  var groupAccess = {
+    name: 'portainer.groups.group.access',
+    url: '/access',
+    views: {
+      'content@': {
+        templateUrl: 'app/portainer/views/groups/access/groupAccess.html',
+        controller: 'GroupAccessController'
       }
     }
   };
@@ -198,6 +253,60 @@ angular.module('portainer.app', [])
     }
   };
 
+  var stacks = {
+    name: 'portainer.stacks',
+    url: '/stacks',
+    views: {
+      'content@': {
+        templateUrl: 'app/portainer/views/stacks/stacks.html',
+        controller: 'StacksController'
+      }
+    }
+  };
+
+  var stack = {
+    name: 'portainer.stacks.stack',
+    url: '/:name?id&type&external',
+    views: {
+      'content@': {
+        templateUrl: 'app/portainer/views/stacks/edit/stack.html',
+        controller: 'StackController'
+      }
+    }
+  };
+
+  var stackCreation = {
+    name: 'portainer.stacks.new',
+    url: '/new',
+    views: {
+      'content@': {
+        templateUrl: 'app/portainer/views/stacks/create/createstack.html',
+        controller: 'CreateStackController'
+      }
+    }
+  };
+
+  var support = {
+    name: 'portainer.support',
+    url: '/support',
+    views: {
+      'content@': {
+        templateUrl: 'app/portainer/views/support/support.html'
+      }
+    }
+  };
+
+  var tags = {
+    name: 'portainer.tags',
+    url: '/tags',
+    views: {
+      'content@': {
+        templateUrl: 'app/portainer/views/tags/tags.html',
+        controller: 'TagsController'
+      }
+    }
+  };
+
   var users = {
     name: 'portainer.users',
     url: '/users',
@@ -253,12 +362,22 @@ angular.module('portainer.app', [])
   $stateRegistryProvider.register(endpoints);
   $stateRegistryProvider.register(endpoint);
   $stateRegistryProvider.register(endpointAccess);
+  $stateRegistryProvider.register(endpointCreation);
+  $stateRegistryProvider.register(groups);
+  $stateRegistryProvider.register(group);
+  $stateRegistryProvider.register(groupAccess);
+  $stateRegistryProvider.register(groupCreation);
   $stateRegistryProvider.register(registries);
   $stateRegistryProvider.register(registry);
   $stateRegistryProvider.register(registryAccess);
   $stateRegistryProvider.register(registryCreation);
   $stateRegistryProvider.register(settings);
   $stateRegistryProvider.register(settingsAuthentication);
+  $stateRegistryProvider.register(stacks);
+  $stateRegistryProvider.register(stack);
+  $stateRegistryProvider.register(stackCreation);
+  $stateRegistryProvider.register(support);
+  $stateRegistryProvider.register(tags);
   $stateRegistryProvider.register(users);
   $stateRegistryProvider.register(user);
   $stateRegistryProvider.register(teams);

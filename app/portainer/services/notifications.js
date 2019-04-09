@@ -1,3 +1,5 @@
+import toastr from 'toastr';
+
 angular.module('portainer.app')
 .factory('Notifications', ['$sanitize', function NotificationsFactory($sanitize) {
   'use strict';
@@ -13,14 +15,18 @@ angular.module('portainer.app')
 
   service.error = function(title, e, fallbackText) {
     var msg = fallbackText;
-    if (e.data && e.data.message) {
+    if (e.err && e.err.data && e.err.data.details) {
+      msg = e.err.data.details;
+    } else if (e.data && e.data.details) {
+      msg = e.data.details;
+    } else if (e.data && e.data.message) {
       msg = e.data.message;
     } else if (e.message) {
       msg = e.message;
     } else if (e.err && e.err.data && e.err.data.message) {
       msg = e.err.data.message;
-    } else if (e.data && e.data.length > 0 && e.data[0].message) {
-      msg = e.data[0].message;
+    } else if (e.err && e.err.data && e.err.data.length > 0 && e.err.data[0].message) {
+      msg = e.err.data[0].message;
     } else if (e.err && e.err.data && e.err.data.err) {
       msg = e.err.data.err;
     } else if (e.data && e.data.err) {

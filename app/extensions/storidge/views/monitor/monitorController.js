@@ -1,6 +1,8 @@
+import moment from 'moment';
+
 angular.module('extension.storidge')
-.controller('StoridgeMonitorController', ['$q', '$scope', '$interval', '$document', 'Notifications', 'StoridgeClusterService', 'StoridgeChartService', 'ModalService',
-function ($q, $scope, $interval, $document, Notifications, StoridgeClusterService, StoridgeChartService, ModalService) {
+.controller('StoridgeMonitorController', ['$q', '$scope', '$interval', '$document', 'Notifications', 'StoridgeClusterService', 'StoridgeChartService',
+function ($q, $scope, $interval, $document, Notifications, StoridgeClusterService, StoridgeChartService) {
 
   $scope.$on('$destroy', function() {
     stopRepeater();

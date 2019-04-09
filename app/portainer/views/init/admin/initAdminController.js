@@ -1,6 +1,6 @@
 angular.module('portainer.app')
-.controller('InitAdminController', ['$scope', '$state', '$sanitize', 'Notifications', 'Authentication', 'StateManager', 'UserService', 'EndpointService', 'EndpointProvider', 'ExtensionManager',
-function ($scope, $state, $sanitize, Notifications, Authentication, StateManager, UserService, EndpointService, EndpointProvider, ExtensionManager) {
+.controller('InitAdminController', ['$scope', '$state', 'Notifications', 'Authentication', 'StateManager', 'UserService', 'EndpointService',
+function ($scope, $state, Notifications, Authentication, StateManager, UserService, EndpointService) {
 
   $scope.logo = StateManager.getState().application.logo;
 
@@ -15,8 +15,8 @@ function ($scope, $state, $sanitize, Notifications, Authentication, StateManager
   };
 
   $scope.createAdminUser = function() {
-    var username = $sanitize($scope.formValues.Username);
-    var password = $sanitize($scope.formValues.Password);
+    var username = $scope.formValues.Username;
+    var password = $scope.formValues.Password;
 
     $scope.state.actionInProgress = true;
     UserService.initAdministrator(username, password)
@@ -30,20 +30,7 @@ function ($scope, $state, $sanitize, Notifications, Authentication, StateManager
       if (data.length === 0) {
         $state.go('portainer.init.endpoint');
       } else {
-        var endpoint = data[0];
-        endpointID = endpoint.Id;
-        EndpointProvider.setEndpointID(endpointID);
-        ExtensionManager.initEndpointExtensions(endpointID)
-        .then(function success(data) {
-          var extensions = data;
-          return StateManager.updateEndpointState(false, extensions);
-        })
-        .then(function success() {
-          $state.go('docker.dashboard');
-        })
-        .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to connect to Docker environment');
-        });
+        $state.go('portainer.home');
       }
     })
     .catch(function error(err) {
@@ -54,4 +41,16 @@ function ($scope, $state, $sanitize, Notifications, Authentication, StateManager
     });
   };
 
+  function createAdministratorFlow() {
+    UserService.administratorExists()
+    .then(function success(exists) {
+      if (exists) {
+        $state.go('portainer.home');
+      }
+    })
+    .catch(function error(err) {
+      Notifications.error('Failure', err, 'Unable to verify administrator account existence');
+    });
+  }
+  createAdministratorFlow();
 }]);

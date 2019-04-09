@@ -1,15 +1,17 @@
 angular.module('portainer.docker').component('volumesDatatable', {
-  templateUrl: 'app/docker/components/datatables/volumes-datatable/volumesDatatable.html',
+  templateUrl: './volumesDatatable.html',
   controller: 'VolumesDatatableController',
   bindings: {
-    title: '@',
+    titleText: '@',
     titleIcon: '@',
     dataset: '<',
     tableKey: '@',
     orderBy: '@',
     reverseOrder: '<',
-    showTextFilter: '<',
     showOwnershipColumn: '<',
-    removeAction: '<'
+    showHostColumn: '<',
+    removeAction: '<',
+    showBrowseAction: '<',
+    offlineMode: '<'
   }
 });

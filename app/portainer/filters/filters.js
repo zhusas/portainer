@@ -1,3 +1,7 @@
+import moment from 'moment';
+import _ from 'lodash-es';
+import filesize from 'filesize';
+
 angular.module('portainer.app')
 .filter('truncate', function () {
   'use strict';
@@ -102,6 +106,28 @@ angular.module('portainer.app')
     return '';
   };
 })
+.filter('endpointtypename', function () {
+  'use strict';
+  return function (type) {
+    if (type === 1) {
+      return 'Docker';
+    } else if (type === 2) {
+      return 'Agent';
+    } else if (type === 3) {
+      return 'Azure ACI';
+    }
+    return '';
+  };
+})
+.filter('endpointtypeicon', function () {
+  'use strict';
+  return function (type) {
+    if (type === 3) {
+      return 'fab fa-microsoft';
+    }
+    return 'fab fa-docker';
+  };
+})
 .filter('ownershipicon', function () {
   'use strict';
   return function (ownership) {
@@ -115,5 +141,14 @@ angular.module('portainer.app')
       default:
         return 'fa fa-eye';
     }
+  };
+})
+.filter('endpointstatusbadge', function () {
+  'use strict';
+  return function (status) {
+    if (status === 2) {
+      return 'danger';
+    }
+    return 'success';
   };
 });

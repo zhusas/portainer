@@ -14,6 +14,18 @@ angular.module('portainer.app')
     getEndpointPublicURL: function() {
       return localStorageService.get('ENDPOINT_PUBLIC_URL');
     },
+    storeOfflineMode: function(isOffline) {
+      localStorageService.set('ENDPOINT_OFFLINE_MODE', isOffline);
+    },
+    getOfflineMode: function() {
+      return localStorageService.get('ENDPOINT_OFFLINE_MODE');
+    },
+    storeEndpoints: function(data) {
+      localStorageService.set('ENDPOINTS_DATA', data);
+    },
+    getEndpoints: function() {
+      return localStorageService.get('ENDPOINTS_DATA');
+    },
     storeEndpointState: function(state) {
       localStorageService.set('ENDPOINT_STATE', state);
     },
@@ -25,6 +37,12 @@ angular.module('portainer.app')
     },
     getApplicationState: function() {
       return localStorageService.get('APPLICATION_STATE');
+    },
+    storeUIState: function(state) {
+      localStorageService.cookie.set('UI_STATE', state);
+    },
+    getUIState: function() {
+      return localStorageService.cookie.get('UI_STATE');
     },
     storeJWT: function(jwt) {
       localStorageService.set('JWT', jwt);
@@ -47,6 +65,12 @@ angular.module('portainer.app')
     storeDataTableOrder: function(key, data) {
       localStorageService.set('datatable_order_' + key, data);
     },
+    getDataTableTextFilters: function(key) {
+      return localStorageService.get('datatable_text_filter_' + key);
+    },
+    storeDataTableTextFilters: function(key, data) {
+      localStorageService.set('datatable_text_filter_' + key, data);
+    },
     getDataTableFilters: function(key) {
       return localStorageService.get('datatable_filters_' + key);
     },
@@ -59,11 +83,35 @@ angular.module('portainer.app')
     storeDataTableSettings: function(key, data) {
       localStorageService.set('datatable_settings_' + key, data);
     },
+    getDataTableExpandedItems: function(key) {
+      return localStorageService.get('datatable_expandeditems_' + key);
+    },
+    storeDataTableExpandedItems: function(key, data) {
+      localStorageService.set('datatable_expandeditems_' + key, data);
+    },
+    getDataTableSelectedItems: function(key) {
+      return localStorageService.get('datatable_selecteditems_' + key);
+    },
+    storeDataTableSelectedItems: function(key, data) {
+      localStorageService.set('datatable_selecteditems_' + key, data);
+    },
     storeSwarmVisualizerSettings: function(key, data) {
       localStorageService.set('swarmvisualizer_' + key, data);
     },
     getSwarmVisualizerSettings: function(key) {
       return localStorageService.get('swarmvisualizer_' + key);
+    },
+    storeColumnVisibilitySettings: function(key, data) {
+      localStorageService.set('col_visibility_' + key, data);
+    },
+    getColumnVisibilitySettings: function(key) {
+      return localStorageService.get('col_visibility_' + key);
+    },
+    storeJobImage: function(data) {
+      localStorageService.set('job_image', data);
+    },
+    getJobImage: function() {
+      return localStorageService.get('job_image');
     },
     clean: function() {
       localStorageService.clearAll();

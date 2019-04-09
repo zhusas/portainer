@@ -1,7 +1,8 @@
-angular.module('portainer.docker')
-.controller('ContainersDatatableController', ['PaginationService', 'DatatableService',
-function (PaginationService, DatatableService) {
+import _ from 'lodash-es';
 
+angular.module('portainer.docker')
+.controller('ContainersDatatableController', ['PaginationService', 'DatatableService', 'EndpointProvider',
+function (PaginationService, DatatableService, EndpointProvider) {
   var ctrl = this;
 
   this.state = {
@@ -10,7 +11,11 @@ function (PaginationService, DatatableService) {
     paginatedItemLimit: PaginationService.getPaginationLimit(this.tableKey),
     displayTextFilter: false,
     selectedItemCount: 0,
-    selectedItems: []
+    selectedItems: [],
+    noStoppedItemsSelected: true,
+    noRunningItemsSelected: true,
+    noPausedItemsSelected: true,
+    publicURL: EndpointProvider.endpointPublicURL()
   };
 
   this.settings = {
@@ -29,6 +34,58 @@ function (PaginationService, DatatableService) {
       enabled: false,
       values: []
     }
+  };
+
+  this.columnVisibility = {
+    state: {
+      open: false
+    },
+    columns: {
+      state: {
+        label: 'State',
+        display: true
+      },
+      actions: {
+        label: 'Quick Actions',
+        display: true
+      },
+      stack: {
+        label: 'Stack',
+        display: true
+      },
+      image: {
+        label: 'Image',
+        display: true
+      },
+      created: {
+        label: 'Created',
+        display: true
+      },
+      ip: {
+        label: 'IP Address',
+        display: true
+      },
+      host: {
+        label: 'Host',
+        display: true
+      },
+      ports: {
+        label: 'Published Ports',
+        display: true
+      },
+      ownership: {
+        label: 'Ownership',
+        display: true
+      }
+    }
+  };
+
+  this.onTextFilterChange = function() {
+    DatatableService.setDataTableTextFilters(this.tableKey, this.state.textFilter);
+  };
+
+  this.onColumnVisibilityChange = function()  {
+    DatatableService.setColumnVisibilitySettings(this.tableKey, this.columnVisibility);
   };
 
   this.changeOrderBy = function(orderField) {
@@ -90,14 +147,7 @@ function (PaginationService, DatatableService) {
     PaginationService.setPaginationLimit(this.tableKey, this.state.paginatedItemLimit);
   };
 
-  this.updateDisplayTextFilter = function() {
-    this.state.displayTextFilter = !this.state.displayTextFilter;
-    if (!this.state.displayTextFilter) {
-      delete this.state.textFilter;
-    }
-  };
-
-  this.applyFilters = function(value, index, array) {
+  this.applyFilters = function(value) {
     var container = value;
     var filters = ctrl.filters;
     for (var i = 0; i < filters.state.values.length; i++) {
@@ -139,12 +189,9 @@ function (PaginationService, DatatableService) {
     var availableStateFilters = [];
     for (var i = 0; i < this.dataset.length; i++) {
       var item = this.dataset[i];
-      if (item.Checked) {
-        this.selectItem(item);
-      }
       availableStateFilters.push({ label: item.Status, display: true });
     }
-     this.filters.state.values = _.uniqBy(availableStateFilters, 'label');
+    this.filters.state.values = _.uniqBy(availableStateFilters, 'label');
   };
 
   this.updateStoredFilters = function(storedFilters) {
@@ -152,7 +199,7 @@ function (PaginationService, DatatableService) {
 
     for (var i = 0; i < datasetFilters.length; i++) {
       var filter = datasetFilters[i];
-      existingFilter = _.find(storedFilters, ['label', filter.label]);
+      var existingFilter = _.find(storedFilters, ['label', filter.label]);
       if (existingFilter && !existingFilter.display) {
         filter.display = existingFilter.display;
         this.filters.state.enabled = true;
@@ -163,7 +210,6 @@ function (PaginationService, DatatableService) {
   this.$onInit = function() {
     setDefaults(this);
     this.prepareTableFromDataset();
-
     var storedOrder = DatatableService.getDataTableOrder(this.tableKey);
     if (storedOrder !== null) {
       this.state.reverseOrder = storedOrder.reverse;
@@ -181,6 +227,17 @@ function (PaginationService, DatatableService) {
       this.settings = storedSettings;
     }
     this.settings.open = false;
+
+    var storedColumnVisibility = DatatableService.getColumnVisibilitySettings(this.tableKey);
+    if (storedColumnVisibility !== null) {
+      this.columnVisibility = storedColumnVisibility;
+    }
+    this.columnVisibility.state.open = false;
+
+    var textFilter = DatatableService.getDataTableTextFilters(this.tableKey);
+    if (textFilter !== null) {
+      this.state.textFilter = textFilter;
+    }
   };
 
   function setDefaults(ctrl) {

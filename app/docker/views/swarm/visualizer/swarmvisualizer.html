@@ -1,5 +1,5 @@
 <rd-header>
-  <rd-header-title title="Swarm visualizer">
+  <rd-header-title title-text="Swarm visualizer">
     <a data-toggle="tooltip" title="Refresh" ui-sref="docker.swarm.visualizer" ui-sref-opts="{reload: true}">
       <i class="fa fa-sync" aria-hidden="true"></i>
     </a>
@@ -12,7 +12,7 @@
 <div class="row">
   <div class="col-sm-12">
     <rd-widget>
-      <rd-widget-header icon="fa-object-group" title="Cluster information">
+      <rd-widget-header icon="fa-object-group" title-text="Cluster information">
         <div class="pull-right">
           <button type="button" class="btn btn-sm btn-primary" ng-click="changeShowInformationPanel(true)" ng-if="!state.ShowInformationPanel">Show</button>
           <button type="button" class="btn btn-sm btn-primary" ng-click="changeShowInformationPanel(false)" ng-if="state.ShowInformationPanel">Hide</button>
@@ -77,14 +77,14 @@
 <div class="row" ng-if="visualizerData">
   <div class="col-sm-12">
     <rd-widget>
-      <rd-widget-header icon="fa-object-group" title="Cluster visualizer"></rd-widget-header>
+      <rd-widget-header icon="fa-object-group" title-text="Cluster visualizer"></rd-widget-header>
       <rd-widget-body>
         <div class="visualizer_container">
           <div class="node" ng-repeat="node in visualizerData.nodes track by $index">
             <div class="node_info">
               <div>
                 <div>
-                  <b>{{ node.Hostname }}</b>
+                  <b>{{ node.Name || node.Hostname }}</b>
                   <span class="node_platform">
                     <i class="fab fa-linux" aria-hidden="true" ng-if="node.PlatformOS === 'linux'"></i>
                     <i class="fab fa-windows" aria-hidden="true" ng-if="node.PlatformOS === 'windows'"></i>
@@ -97,7 +97,7 @@
               <div><span class="label label-{{ node.Status | nodestatusbadge }}">{{ node.Status }}</span></div>
             </div>
             <div class="tasks">
-              <div class="task task_{{ task.Status.State | visualizerTask }}" style="border: 2px solid {{ task.ServiceId | visualizerTaskBorderColor }}" ng-repeat="task in node.Tasks | filter: (state.DisplayOnlyRunningTasks || '') && { Status: { State: 'running' } }">
+              <div class="task task_{{ task.Status.State | visualizerTask }}" style="border: 2px solid {{ task.ServiceId | visualizerTaskBorderColor }}" ng-repeat="task in node.Tasks | orderBy: 'ServiceName' | filter: (state.DisplayOnlyRunningTasks || '') && { Status: { State: 'running' } }">
                 <div class="service_name">{{ task.ServiceName }}</div>
                 <div>Image: {{ task.Spec.ContainerSpec.Image | hideshasum }}</div>
                 <div>Status: {{ task.Status.State }}</div>

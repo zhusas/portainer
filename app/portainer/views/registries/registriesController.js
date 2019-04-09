@@ -1,6 +1,6 @@
 angular.module('portainer.app')
-.controller('RegistriesController', ['$q', '$scope', '$state', 'RegistryService', 'DockerHubService', 'ModalService', 'Notifications', 'PaginationService',
-function ($q, $scope, $state, RegistryService, DockerHubService, ModalService, Notifications, PaginationService) {
+.controller('RegistriesController', ['$q', '$scope', '$state', 'RegistryService', 'DockerHubService', 'ModalService', 'Notifications', 'ExtensionService', 'Authentication',
+function ($q, $scope, $state, RegistryService, DockerHubService, ModalService, Notifications, ExtensionService, Authentication) {
 
   $scope.state = {
     actionInProgress: false
@@ -15,7 +15,7 @@ function ($q, $scope, $state, RegistryService, DockerHubService, ModalService, N
     dockerhub.Password = $scope.formValues.dockerHubPassword;
     $scope.state.actionInProgress = true;
     DockerHubService.update(dockerhub)
-    .then(function success(data) {
+    .then(function success() {
       Notifications.success('DockerHub registry updated');
     })
     .catch(function error(err) {
@@ -60,11 +60,19 @@ function ($q, $scope, $state, RegistryService, DockerHubService, ModalService, N
   function initView() {
     $q.all({
       registries: RegistryService.registries(),
-      dockerhub: DockerHubService.dockerhub()
+      dockerhub: DockerHubService.dockerhub(),
+      registryManagement: ExtensionService.registryManagementEnabled()
     })
     .then(function success(data) {
       $scope.registries = data.registries;
       $scope.dockerhub = data.dockerhub;
+      $scope.registryManagementAvailable = data.registryManagement;
+      var authenticationEnabled = $scope.applicationState.application.authentication;
+      if (authenticationEnabled) {
+        var userDetails = Authentication.getUserDetails();
+        var isAdmin = userDetails.role === 1;
+        $scope.isAdmin = isAdmin;
+      }
     })
     .catch(function error(err) {
       $scope.registries = [];

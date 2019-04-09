@@ -12,28 +12,41 @@ function EndpointServiceFactory($q, Endpoints, FileUploadService) {
     return Endpoints.query({}).$promise;
   };
 
+  service.snapshotEndpoints = function() {
+    return Endpoints.snapshots({}, {}).$promise;
+  };
+
+  service.snapshotEndpoint = function(endpointID) {
+    return Endpoints.snapshot({ id: endpointID }, {}).$promise;
+  };
+
+  service.endpointsByGroup = function(groupId) {
+    var deferred = $q.defer();
+
+    Endpoints.query({}).$promise
+    .then(function success(data) {
+      var endpoints = data.filter(function (endpoint) {
+        return endpoint.GroupId === groupId;
+      });
+      deferred.resolve(endpoints);
+    })
+    .catch(function error(err) {
+      deferred.reject({msg: 'Unable to retrieve endpoints', err: err});
+    });
+
+    return deferred.promise;
+  };
+
   service.updateAccess = function(id, authorizedUserIDs, authorizedTeamIDs) {
     return Endpoints.updateAccess({id: id}, {authorizedUsers: authorizedUserIDs, authorizedTeams: authorizedTeamIDs}).$promise;
   };
 
-  service.updateEndpoint = function(id, endpointParams) {
-    var query = {
-      name: endpointParams.name,
-      PublicURL: endpointParams.PublicURL,
-      TLS: endpointParams.TLS,
-      TLSSkipVerify: endpointParams.TLSSkipVerify,
-      TLSSkipClientVerify: endpointParams.TLSSkipClientVerify,
-      authorizedUsers: endpointParams.authorizedUsers
-    };
-    if (endpointParams.type && endpointParams.URL) {
-      query.URL = endpointParams.type === 'local' ? ('unix://' + endpointParams.URL) : ('tcp://' + endpointParams.URL);
-    }
-
+  service.updateEndpoint = function(id, payload) {
     var deferred = $q.defer();
-    FileUploadService.uploadTLSFilesForEndpoint(id, endpointParams.TLSCACert, endpointParams.TLSCert, endpointParams.TLSKey)
+    FileUploadService.uploadTLSFilesForEndpoint(id, payload.TLSCACert, payload.TLSCert, payload.TLSKey)
     .then(function success() {
       deferred.notify({upload: false});
-      return Endpoints.update({id: id}, query).$promise;
+      return Endpoints.update({id: id}, payload).$promise;
     })
     .then(function success(data) {
       deferred.resolve(data);
@@ -49,10 +62,10 @@ function EndpointServiceFactory($q, Endpoints, FileUploadService) {
     return Endpoints.remove({id: endpointID}).$promise;
   };
 
-  service.createLocalEndpoint = function(name, URL, TLS, active) {
+  service.createLocalEndpoint = function() {
     var deferred = $q.defer();
 
-    FileUploadService.createEndpoint('local', 'unix:///var/run/docker.sock', '', false)
+    FileUploadService.createEndpoint('local', 1, '', '', 1, [], false)
     .then(function success(response) {
       deferred.resolve(response.data);
     })
@@ -63,10 +76,10 @@ function EndpointServiceFactory($q, Endpoints, FileUploadService) {
     return deferred.promise;
   };
 
-  service.createRemoteEndpoint = function(name, URL, PublicURL, TLS, TLSSkipVerify, TLSSkipClientVerify, TLSCAFile, TLSCertFile, TLSKeyFile) {
+  service.createRemoteEndpoint = function(name, type, URL, PublicURL, groupID, tags, TLS, TLSSkipVerify, TLSSkipClientVerify, TLSCAFile, TLSCertFile, TLSKeyFile) {
     var deferred = $q.defer();
 
-    FileUploadService.createEndpoint(name, 'tcp://' + URL, PublicURL, TLS, TLSSkipVerify, TLSSkipClientVerify, TLSCAFile, TLSCertFile, TLSKeyFile)
+    FileUploadService.createEndpoint(name, type, 'tcp://' + URL, PublicURL, groupID, tags, TLS, TLSSkipVerify, TLSSkipClientVerify, TLSCAFile, TLSCertFile, TLSKeyFile)
     .then(function success(response) {
       deferred.resolve(response.data);
     })
@@ -75,6 +88,33 @@ function EndpointServiceFactory($q, Endpoints, FileUploadService) {
     });
 
     return deferred.promise;
+  };
+
+  service.createAzureEndpoint = function(name, applicationId, tenantId, authenticationKey, groupId, tags) {
+    var deferred = $q.defer();
+
+    FileUploadService.createAzureEndpoint(name, applicationId, tenantId, authenticationKey, groupId, tags)
+    .then(function success(response) {
+      deferred.resolve(response.data);
+    })
+    .catch(function error(err) {
+      deferred.reject({msg: 'Unable to connect to Azure', err: err});
+    });
+
+    return deferred.promise;
+  };
+
+  service.executeJobFromFileUpload = function (image, jobFile, endpointId, nodeName) {
+    return FileUploadService.executeEndpointJob(image, jobFile, endpointId, nodeName);
+  };
+
+  service.executeJobFromFileContent = function (image, jobFileContent, endpointId, nodeName) {
+    var payload = {
+      Image: image,
+      FileContent: jobFileContent
+    };
+
+    return Endpoints.executeJob({ id: endpointId, method: 'string', nodeName: nodeName }, payload).$promise;
   };
 
   return service;

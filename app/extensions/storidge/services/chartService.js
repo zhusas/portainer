@@ -1,3 +1,6 @@
+import Chart from 'chart.js';
+import filesize from 'filesize';
+
 angular.module('extension.storidge')
 .factory('StoridgeChartService', [function StoridgeChartService() {
   'use strict';
@@ -178,7 +181,7 @@ angular.module('extension.storidge')
     return label + ': ' + processedValue + '/s';
   }
 
-  function bytePerSecBasedAxisLabel(value, index, values) {
+  function bytePerSecBasedAxisLabel(value) {
     if (value > 5) {
       return filesize(value, {base: 10, round: 1});
     }

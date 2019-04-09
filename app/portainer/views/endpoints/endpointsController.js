@@ -1,48 +1,6 @@
 angular.module('portainer.app')
-.controller('EndpointsController', ['$scope', '$state', '$filter',  'EndpointService', 'Notifications',
-function ($scope, $state, $filter, EndpointService, Notifications) {
-  $scope.state = {
-    uploadInProgress: false,
-    actionInProgress: false
-  };
-
-  $scope.formValues = {
-    Name: '',
-    URL: '',
-    PublicURL: '',
-    SecurityFormData: new EndpointSecurityFormData()
-  };
-
-  $scope.addEndpoint = function() {
-    var name = $scope.formValues.Name;
-    var URL = $filter('stripprotocol')($scope.formValues.URL);
-    var PublicURL = $scope.formValues.PublicURL;
-    if (PublicURL === '') {
-      PublicURL = URL.split(':')[0];
-    }
-
-    var securityData = $scope.formValues.SecurityFormData;
-    var TLS = securityData.TLS;
-    var TLSMode = securityData.TLSMode;
-    var TLSSkipVerify = TLS && (TLSMode === 'tls_client_noca' || TLSMode === 'tls_only');
-    var TLSSkipClientVerify = TLS && (TLSMode === 'tls_ca' || TLSMode === 'tls_only');
-    var TLSCAFile = TLSSkipVerify ? null : securityData.TLSCACert;
-    var TLSCertFile = TLSSkipClientVerify ? null : securityData.TLSCert;
-    var TLSKeyFile = TLSSkipClientVerify ? null : securityData.TLSKey;
-
-    $scope.state.actionInProgress = true;
-    EndpointService.createRemoteEndpoint(name, URL, PublicURL, TLS, TLSSkipVerify, TLSSkipClientVerify, TLSCAFile, TLSCertFile, TLSKeyFile)
-    .then(function success() {
-      Notifications.success('Endpoint created', name);
-      $state.reload();
-    })
-    .catch(function error(err) {
-      Notifications.error('Failure', err, 'Unable to create endpoint');
-    })
-    .finally(function final() {
-      $scope.state.actionInProgress = false;
-    });
-  };
+.controller('EndpointsController', ['$q', '$scope', '$state', 'EndpointService', 'GroupService', 'EndpointHelper', 'Notifications',
+function ($q, $scope, $state, EndpointService, GroupService, EndpointHelper, Notifications) {
 
   $scope.removeAction = function (selectedItems) {
     var actionCount = selectedItems.length;
@@ -65,16 +23,22 @@ function ($scope, $state, $filter, EndpointService, Notifications) {
     });
   };
 
-  function fetchEndpoints() {
-    EndpointService.endpoints()
+  function initView() {
+    $q.all({
+      endpoints: EndpointService.endpoints(),
+      groups: GroupService.groups()
+    })
     .then(function success(data) {
-      $scope.endpoints = data;
+      var endpoints = data.endpoints;
+      var groups = data.groups;
+      EndpointHelper.mapGroupNameToEndpoint(endpoints, groups);
+      $scope.groups = groups;
+      $scope.endpoints = endpoints;
     })
     .catch(function error(err) {
-      Notifications.error('Failure', err, 'Unable to retrieve endpoints');
-      $scope.endpoints = [];
+      Notifications.error('Failure', err, 'Unable to load view');
     });
   }
 
-  fetchEndpoints();
+  initView();
 }]);

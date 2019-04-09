@@ -1,5 +1,5 @@
 angular.module('extension.storidge').component('storidgeProfilesDatatable', {
-  templateUrl: 'app/extensions/storidge/components/profiles-datatable/storidgeProfilesDatatable.html',
+  templateUrl: './storidgeProfilesDatatable.html',
   controller: 'GenericDatatableController',
   bindings: {
     title: '@',
@@ -8,7 +8,6 @@ angular.module('extension.storidge').component('storidgeProfilesDatatable', {
     tableKey: '@',
     orderBy: '@',
     reverseOrder: '<',
-    showTextFilter: '<',
     removeAction: '<'
   }
 });

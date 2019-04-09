@@ -1,3 +1,5 @@
+import './datatable.css';
+
 angular.module('portainer.app')
 .controller('GenericDatatableController', ['PaginationService', 'DatatableService',
 function (PaginationService, DatatableService) {
@@ -9,6 +11,11 @@ function (PaginationService, DatatableService) {
     displayTextFilter: false,
     selectedItemCount: 0,
     selectedItems: []
+  };
+
+
+  this.onTextFilterChange = function() {
+    DatatableService.setDataTableTextFilters(this.tableKey, this.state.textFilter);
   };
 
   this.changeOrderBy = function(orderField) {
@@ -41,13 +48,6 @@ function (PaginationService, DatatableService) {
     PaginationService.setPaginationLimit(this.tableKey, this.state.paginatedItemLimit);
   };
 
-  this.updateDisplayTextFilter = function() {
-    this.state.displayTextFilter = !this.state.displayTextFilter;
-    if (!this.state.displayTextFilter) {
-      delete this.state.textFilter;
-    }
-  };
-
   this.$onInit = function() {
     setDefaults(this);
 
@@ -55,6 +55,12 @@ function (PaginationService, DatatableService) {
     if (storedOrder !== null) {
       this.state.reverseOrder = storedOrder.reverse;
       this.state.orderBy = storedOrder.orderBy;
+    }
+
+    var textFilter = DatatableService.getDataTableTextFilters(this.tableKey);
+    if (textFilter !== null) {
+      this.state.textFilter = textFilter;
+      this.onTextFilterChange();
     }
   };
 

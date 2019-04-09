@@ -11,6 +11,10 @@ function (PaginationService, DatatableService) {
     selectedItems: []
   };
 
+  this.onTextFilterChange = function() {
+    DatatableService.setDataTableTextFilters(this.tableKey, this.state.textFilter);
+  };
+
   this.changeOrderBy = function(orderField) {
     this.state.reverseOrder = this.state.orderBy === orderField ? !this.state.reverseOrder : false;
     this.state.orderBy = orderField;
@@ -30,7 +34,7 @@ function (PaginationService, DatatableService) {
   this.selectAll = function() {
     for (var i = 0; i < this.state.filteredDataSet.length; i++) {
       var item = this.state.filteredDataSet[i];
-      if (item.Id && item.Checked !== this.state.selectAll) {
+      if (!(item.External && item.Type === 2) && item.Checked !== this.state.selectAll) {
         item.Checked = this.state.selectAll;
         this.selectItem(item);
       }
@@ -41,13 +45,6 @@ function (PaginationService, DatatableService) {
     PaginationService.setPaginationLimit(this.tableKey, this.state.paginatedItemLimit);
   };
 
-  this.updateDisplayTextFilter = function() {
-    this.state.displayTextFilter = !this.state.displayTextFilter;
-    if (!this.state.displayTextFilter) {
-      delete this.state.textFilter;
-    }
-  };
-
   this.$onInit = function() {
     setDefaults(this);
 
@@ -55,6 +52,11 @@ function (PaginationService, DatatableService) {
     if (storedOrder !== null) {
       this.state.reverseOrder = storedOrder.reverse;
       this.state.orderBy = storedOrder.orderBy;
+    }
+
+    var textFilter = DatatableService.getDataTableTextFilters(this.tableKey);
+    if (textFilter !== null) {
+      this.state.textFilter = textFilter;
     }
   };
 

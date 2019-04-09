@@ -12,7 +12,7 @@ function (PaginationService, DatatableService) {
     selectedItemCount: 0,
     selectedItems: []
   };
-  
+
   this.filters = {
     usage: {
       open: false,
@@ -20,6 +20,10 @@ function (PaginationService, DatatableService) {
       showUsedImages: true,
       showUnusedImages: true
     }
+  };
+
+  this.onTextFilterChange = function() {
+    DatatableService.setDataTableTextFilters(this.tableKey, this.state.textFilter);
   };
 
   this.changeOrderBy = function(orderField) {
@@ -52,23 +56,16 @@ function (PaginationService, DatatableService) {
     PaginationService.setPaginationLimit(this.tableKey, this.state.paginatedItemLimit);
   };
 
-  this.updateDisplayTextFilter = function() {
-    this.state.displayTextFilter = !this.state.displayTextFilter;
-    if (!this.state.displayTextFilter) {
-      delete this.state.textFilter;
-    }
-  };
-  
-  this.applyFilters = function(value, index, array) {
+  this.applyFilters = function(value) {
     var image = value;
     var filters = ctrl.filters;
-    if ((image.ContainerCount === 0 && filters.usage.showUnusedImages) 
+    if ((image.ContainerCount === 0 && filters.usage.showUnusedImages)
       || (image.ContainerCount !== 0 && filters.usage.showUsedImages)) {
       return true;
     }
     return false;
   };
-  
+
   this.onUsageFilterChange = function() {
     var filters = this.filters.usage;
     var filtered = false;
@@ -87,12 +84,17 @@ function (PaginationService, DatatableService) {
       this.state.reverseOrder = storedOrder.reverse;
       this.state.orderBy = storedOrder.orderBy;
     }
-    
+
     var storedFilters = DatatableService.getDataTableFilters(this.tableKey);
     if (storedFilters !== null) {
       this.filters = storedFilters;
     }
     this.filters.usage.open = false;
+
+    var textFilter = DatatableService.getDataTableTextFilters(this.tableKey);
+    if (textFilter !== null) {
+      this.state.textFilter = textFilter;
+    }
   };
 
   function setDefaults(ctrl) {

@@ -1,5 +1,8 @@
-function VolumeViewModel(data) {
+import { ResourceControlViewModel } from "../../portainer/models/resourceControl";
+
+export function VolumeViewModel(data) {
   this.Id = data.Name;
+  this.CreatedAt = data.CreatedAt;
   this.Driver = data.Driver;
   this.Options = data.Options;
   this.Labels = data.Labels;
@@ -13,6 +16,9 @@ function VolumeViewModel(data) {
   if (data.Portainer) {
     if (data.Portainer.ResourceControl) {
       this.ResourceControl = new ResourceControlViewModel(data.Portainer.ResourceControl);
+    }
+    if (data.Portainer.Agent && data.Portainer.Agent.NodeName) {
+      this.NodeName = data.Portainer.Agent.NodeName;
     }
   }
 }

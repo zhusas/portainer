@@ -1,5 +1,9 @@
+import { ServiceViewModel } from '../models/service';
+
+
 angular.module('portainer.docker')
-.factory('ServiceService', ['$q', 'Service', 'ServiceHelper', 'TaskService', 'ResourceControlService', function ServiceServiceFactory($q, Service, ServiceHelper, TaskService, ResourceControlService) {
+.factory('ServiceService', ['$q', 'Service', 'ServiceHelper', 'TaskService', 'ResourceControlService', 'LogHelper',
+function ServiceServiceFactory($q, Service, ServiceHelper, TaskService, ResourceControlService, LogHelper) {
   'use strict';
   var service = {};
 
@@ -58,16 +62,28 @@ angular.module('portainer.docker')
     return Service.update({ id: service.Id, version: service.Version }, config).$promise;
   };
 
-  service.logs = function(id, stdout, stderr, timestamps, tail) {
+  service.logs = function(id, stdout, stderr, timestamps, since, tail) {
+    var deferred = $q.defer();
+
     var parameters = {
       id: id,
       stdout: stdout || 0,
       stderr: stderr || 0,
       timestamps: timestamps || 0,
+      since: since || 0,
       tail: tail || 'all'
     };
 
-    return Service.logs(parameters).$promise;
+    Service.logs(parameters).$promise
+    .then(function success(data) {
+      var logs = LogHelper.formatLogs(data.logs, true);
+      deferred.resolve(logs);
+    })
+    .catch(function error(err) {
+      deferred.reject(err);
+    });
+
+    return deferred.promise;
   };
 
   return service;

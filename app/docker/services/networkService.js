@@ -1,3 +1,5 @@
+import { NetworkViewModel } from '../models/network';
+
 angular.module('portainer.docker')
 .factory('NetworkService', ['$q', 'Network', function NetworkServiceFactory($q, Network) {
   'use strict';
@@ -19,7 +21,7 @@ angular.module('portainer.docker')
   service.network = function(id) {
     var deferred = $q.defer();
 
-    Network.get({id: id}).$promise
+    Network.get({ id: id }).$promise
     .then(function success(data) {
       var network = new NetworkViewModel(data);
       deferred.resolve(network);
@@ -31,10 +33,10 @@ angular.module('portainer.docker')
     return deferred.promise;
   };
 
-  service.networks = function(localNetworks, swarmNetworks, swarmAttachableNetworks) {
+  service.networks = function(localNetworks, swarmNetworks, swarmAttachableNetworks, filters) {
     var deferred = $q.defer();
 
-    Network.query({}).$promise
+    Network.query({ filters: filters }).$promise
     .then(function success(data) {
       var networks = data;
 
@@ -63,6 +65,14 @@ angular.module('portainer.docker')
 
   service.remove = function(id) {
     return Network.remove({ id: id }).$promise;
+  };
+
+  service.disconnectContainer = function(networkId, containerId, force) {
+    return Network.disconnect({ id: networkId }, { Container: containerId, Force: force }).$promise;
+  };
+
+  service.connectContainer = function(networkId, containerId) {
+    return Network.connect({ id: networkId }, { Container: containerId }).$promise;
   };
 
   return service;

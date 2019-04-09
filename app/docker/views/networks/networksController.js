@@ -1,10 +1,11 @@
 angular.module('portainer.docker')
-.controller('NetworksController', ['$scope', '$state', 'NetworkService', 'Notifications',
-function ($scope, $state, NetworkService, Notifications) {
+.controller('NetworksController', ['$scope', '$state', 'NetworkService', 'Notifications', 'HttpRequestHelper', 'EndpointProvider',
+function ($scope, $state, NetworkService, Notifications, HttpRequestHelper, EndpointProvider) {
 
   $scope.removeAction = function (selectedItems) {
     var actionCount = selectedItems.length;
     angular.forEach(selectedItems, function (network) {
+      HttpRequestHelper.setPortainerAgentTargetHeader(network.NodeName);
       NetworkService.remove(network.Id)
       .then(function success() {
         Notifications.success('Network successfully removed', network.Name);
@@ -23,10 +24,13 @@ function ($scope, $state, NetworkService, Notifications) {
     });
   };
 
+  $scope.offlineMode = false;
+
   function initView() {
-    NetworkService.networks(true, true, true, true)
+    NetworkService.networks(true, true, true)
     .then(function success(data) {
       $scope.networks = data;
+      $scope.offlineMode = EndpointProvider.offlineMode();
     })
     .catch(function error(err) {
       $scope.networks = [];
